@@ -1,87 +1,185 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thtmeleaf.org">
-  <head>
-      <meta charset="UTF-8">
-      <title>タスク管理アプリケーション</title>
-      <link th:href="@{/home.css}" rel="stylesheet">
-  </head>
-  <body>
-    <h1>タスク管理アプリケーション</h1>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>タスク管理アプリケーション</title>
+  <!--    <link th:href="@{/home.css}" rel="stylesheet">-->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery.min.js"></script>
+  <!-- toastr JSファイル -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <!-- toastr CSSファイル -->
+  <link href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" rel="stylesheet"/>
+</head>
+<body>
+<h1 class="aaa">タスク管理アプリケーション</h1>
 
-    <div class="task_form">
-      <h2>タスクの登録</h2>
+<div class="search_month">
+  <form action="/search" id="month">
+    <label class="form-label">月ごとに検索</label>
+    <input type="month" name="month" id="new_month" th:value="${month}"/>
+    <button type="submit">検索</button>
+  </form>
+</div>
 
-      <form action="/add">
-        <label>タスク</label>
-        <input name="task" type="text" />
-        <label>期限</label>
-        <input name="deadline" type="date" />
-        <input type="submit" value="登録" />
-      </form>
-    </div>
+<div class="complete_judgment">
+  <form action="/judgment">
+    <label class="form-label">完了済みは非表示</label>
+    <input type="checkbox" name="complete" value="false">
+    <button type="submit">実行</button>
+  </form>
+</div>
+<div class="task_form">
+  <h2>タスクの登録</h2>
+<!--      <form action="/add">-->
+  <label class="form-label">タスク</label>
+  <input name="task" class="form-control"　type="text" id="new_task" />
+  <label class="form-label">期限</label>
+  <input class="form-control" name="deadline" type="date" id="new_deadline"/>
 
-    <div class="tasklist">
-      <h2>現在のタスクの一覧</h2>
-      <table border="1" style="border-collapse:collapse;">
-        <thead>
-          <tr><th class="hidden">ID</th>
-              <th>タスク</th>
-              <th width="150px">期限</th>
-              <th width="100px">状態</th>
-            <th></th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr th:each="task : ${taskList}">
-            <td class="hidden" th:text="${task.id}"></td>
-            <td th:text="${task.task}"></td>
-            <td width="100px" th:text="${task.deadline}"></td>
-            <td width="50px" th:text="${task.done} ? '完了':'未完了'"></td>
-            <td width="50px">
-              <button type="submit" id="update_button" onclick=
-                      "let row = this.parentElement.parentElement;
-                       getElementById('update_id').value=row.cells[0].firstChild.data;
-                       getElementById('update_task').value=
-                          row.cells[1].firstChild.data;
-                       getElementById('update_deadline').value=row.cells[2].firstChild.data;
-                       getElementById('update_status').selectedIndex=(row.cells[3].firstChild.data=='完了')?1:0;
-                       var dialog = getElementById('updateDialog');
-                       dialog.style.left = ((window.innerWidth - 500) / 2) + 'px';
-                       dialog.style.display = 'block';">更新</button>
-            </td>
-            <td width="50px">
-              <form action="/delete">
-                <button type="submit" id="delete_button">削除</button>
-                <input type="hidden" name="id" th:value="${task.id}" />
-              </form>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  <div id="updateDialog">
-    <div class="task_form">
-      <h2>タスクの更新</h2>
+  <label class="form-label">メモ</label>
+  <input name="memo" class="form-control"　type="text" id="new_memo" />
+
+  <input type="submit" value="登録" onclick="restAdd();" />
+<!--      </form>-->
+</div>
+<div>
+  <h2>現在のタスク一覧</h2>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th class="hidden">ID</th>
+      <th>タスク</th>
+      <th>期限</th>
+      <th>メモ</th>
+      <th>状態</th>
+      <th>更新<!-- 更新ボタン --></th>
+      <th>削除<!-- 削除ボタン --></th>
+    </tr>
+    </thead>
+    <tbody id="task_list_body">
+    <tr th:each="task : ${taskList}">
+      <td th:text="${task.id}" class="hidden"></td>
+      <td th:text="${task.task}"></td>
+      <td th:text="${task.deadline}"></td>
+      <td th:text="${task.memo}"></td>
+      <td th:text="${task.done} ? '完' : '未'"></td>
+      <td>
+        <button type="submit" name="update_button" onclick="copyToDialog(this.parentElement.parentElement);" data-bs-toggle="modal" data-bs-target="#updatedialog" class="btn btn-primary">更新</button>
+      </td>
+      <td>
+        <form action="/delete">
+          <button type="submit" name="delete_button" class="btn btn-secondary">削除</button>
+          <input type="hidden" name="id" th:value="${task.id}" />
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<div id="updatedialog" class="modal fade" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
       <form action="/update">
-        <input id="update_id" name="id" type="hidden" />
-        <label>タスク</label>
-        <input id="update_task" name="task" type="text" />
-        <label>期限</label>
-        <input id="update_deadline" name="deadline" type="date" />
-        <label>状態</label>
-        <select id="update_status" name="done">
-          <option value="false">未完了</option>
-          <option value="true">完了</option>
-        </select>
-        <div>
-          <button type="submit">更新</button>
-          <button type="reset"
-                  onclick="getElementById('updateDialog').style.display
-                  ='none';">キャンセル</button>
+        <div class="modal-header">
+          <h2>タスクの更新</h2>
+        </div>
+        <div class="modal-body">
+          <input id="update_id" name="id" type="hidden"/>
+          <label for="update_task">タスク</label>
+          <input id="update_task" class="form-control" name="task" type="text"/>
+          <label for="update_deadline">期限</label>
+          <input id="update_deadline" class="form-control" name="deadline" type="date"/>
+          <label for="update_memo">メモ</label>
+          <input id="update_memo" class="form-control" name="memo" type="text"/>
+          <label for="update_status">状態</label>
+          <select id="update_status" class="form-select" name="done">
+            <option value="false">未</option>
+            <option value="true">完</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">更新</button>
+          <button type="reset" data-bs-dismiss="modal" class="btn btn-secondary">キャンセル</button>
         </div>
       </form>
     </div>
   </div>
-  </body>
+</div>
+
+<script language="JavaScript">
+    function copyToDialog(row){
+ var children = $(row).children();
+        $('#update_id').val($(children)[0].textContent);
+        $('#update_task').val($(children)[1].textContent);
+        $('#update_deadline').val($(children)[2].textContent);
+        $('#update_memo').val($(children)[3].textContent);
+        $('#update_status').selectedIndex=($(children)[4].textContent=='完')?1:0;
+
+<!--        var dialog = document.getElementById('updatedialog');-->
+<!--        dialog.style.left= ((window.innerWidth - 500) / 2) + 'px';-->
+<!--        dialog.style.display='block';-->
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+<script>
+    function restAdd(){
+        var new_task = $("#new_task").val();
+        var new_deadline = $("#new_deadline").val();
+        var new_memo = $("#new_memo").val();
+        $.ajax({
+          type: "POST",
+          url: "/rest_add",
+          data: { task: new_task, deadline: new_deadline, memo: new_memo }
+        }).done(function( msg ) {
+          var str = JSON.stringify(msg);
+          $("#task_list_body").empty();   //テーブルクリア
+          for(var i=0; i<msg.length; i++){
+            var id = msg[i].id;
+            var task = msg[i].task;
+            var deadline = msg[i].deadline;
+            var memo = msg[i].memo;
+            var done = msg[i].done;
+
+            $obj = $("#table_row").clone();  //追加する行のデータをコピー
+            //ここにid,task,deadline,doneのセット処理を記述
+            $obj.find("[name=id]").text(id);
+            $obj.find("[name=task]").text(task);
+            $obj.find("[name=deadline]").text(deadline);
+            $obj.find("[name=memo]").text(memo);
+            $obj.find("[name=done]").text(done  ? "完" : "未");
+
+            $obj.find("button").removeAttr('hidden');
+            $("#task_list_body").append($obj); //テーブルに行を追加
+            }
+        });
+    }
+</script>
+<div hidden>
+  <table>
+    <tbody>
+    <tr id="table_row">
+      <td name="id"></td>
+      <td name="task"></td>
+      <td name="deadline"></td>
+      <td name="memo"></td>
+      <td name="done"></td>
+
+      <td>
+        <button type="submit" name="update_button" onclick="copyToDialog(this.parentElement.parentElement);" data-bs-toggle="modal" data-bs-target="#updatedialog" class="btn btn-primary">更新</button>
+      </td>
+      <td>
+        <form action="/delete">
+          <button type="submit" name="delete_button" class="btn btn-secondary">削除</button>
+          <input type="hidden" name="id" />
+        </form>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+</body>
 </html>
