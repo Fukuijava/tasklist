@@ -14,7 +14,7 @@ import java.util.Map;
 @Service
 public class TaskListDao {
     private final static String TABLE_NAME = "tasklist";
-    private  final JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     @Autowired
     TaskListDao(JdbcTemplate jdbcTemplate) {
@@ -48,7 +48,7 @@ public class TaskListDao {
         return count;
     }
 
-    public <LIst> List<HomeController.TaskItem> findAll(){
+    public <LIst> List<HomeController.TaskItem> findAll() {
         String query = "SELECT * FROM " + TABLE_NAME;
         List<Map<String, Object>> result = jdbcTemplate.queryForList(query);
         List<HomeController.TaskItem> list = result.stream().map(
@@ -56,18 +56,18 @@ public class TaskListDao {
                         row.get("id").toString(),
                         row.get("task").toString(),
                         row.get("deadline").toString(),
-                        (String)row.get("memo"),
-                        (Boolean)row.get("done")
+                        (String) row.get("memo"),
+                        (Boolean) row.get("done")
                 )).toList();
         return list;
     }
 
-    public int delete(String id){
+    public int delete(String id) {
         int num = jdbcTemplate.update("DELETE FROM " + TABLE_NAME + " WHERE id = ?", id);
         return num;
     }
 
-    public int update(HomeController.TaskItem taskItem){
+    public int update(HomeController.TaskItem taskItem) {
         int number = jdbcTemplate.update("update tasklist set task=?, deadline=?, memo=?, done=? where id = ?",
                 taskItem.task(),
                 taskItem.deadline(),
@@ -77,21 +77,21 @@ public class TaskListDao {
         return number;
     }
 
-    public List<HomeController.TaskItem> search(String  month){
-        String  entered_month = "SELECT * FROM tasklist WHERE deadline like '" + month + "%'";
+    public List<HomeController.TaskItem> month_search(String month) {
+        String entered_month = "SELECT * FROM tasklist WHERE deadline like '" + month + "%'";
         List<Map<String, Object>> result = this.jdbcTemplate.queryForList(entered_month);
         List<HomeController.TaskItem> list = result.stream().map(
                 (Map<String, Object> row) -> new HomeController.TaskItem(
                         row.get("id").toString(),
                         row.get("task").toString(),
                         row.get("deadline").toString(),
-                        (String)row.get("memo"),
-                        (Boolean)row.get("done")
+                        (String) row.get("memo"),
+                        (Boolean) row.get("done")
                 )).toList();
         return list;
     }
 
-    public List<HomeController.TaskItem> judgment(Boolean complete){
+    public List<HomeController.TaskItem> judgment(Boolean complete) {
         String judgment_result = "SELECT * FROM tasklist WHERE done = " + complete;
         List<Map<String, Object>> result = this.jdbcTemplate.queryForList(judgment_result);
         List<HomeController.TaskItem> list = result.stream().map(
@@ -99,8 +99,33 @@ public class TaskListDao {
                         row.get("id").toString(),
                         row.get("task").toString(),
                         row.get("deadline").toString(),
-                        (String)row.get("memo"),
-                        (Boolean)row.get("done")
+                        (String) row.get("memo"),
+                        (Boolean) row.get("done")
+                )).toList();
+        return list;
+    }
+
+    public List<HomeController.TaskItem> name_search(HomeController.TaskNameItem taskNameItem) {
+        String entered_task_name = "";
+        switch (taskNameItem.conditions()) {
+            case "forward":
+                entered_task_name = "SELECT * FROM tasklist WHERE task like '" + taskNameItem.task_name() + "%'";
+                break;
+            case "part":
+                entered_task_name = "SELECT * FROM tasklist WHERE task like '%" + taskNameItem.task_name() + "%'";
+                break;
+            case "backward":
+                entered_task_name = "SELECT * FROM tasklist WHERE task like '%" + taskNameItem.task_name() + "'";
+                break;
+        }
+        List<Map<String, Object>> result = this.jdbcTemplate.queryForList(entered_task_name);
+        List<HomeController.TaskItem> list = result.stream().map(
+                (Map<String, Object> row) -> new HomeController.TaskItem(
+                        row.get("id").toString(),
+                        row.get("task").toString(),
+                        row.get("deadline").toString(),
+                        (String) row.get("memo"),
+                        (Boolean) row.get("done")
                 )).toList();
         return list;
     }

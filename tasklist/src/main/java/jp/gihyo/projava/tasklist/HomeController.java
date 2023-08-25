@@ -29,6 +29,7 @@ public class HomeController {
     }
 
     record TaskItem(String id, String task,String deadline, String memo, boolean done){}
+    record TaskNameItem(String task_name, String conditions){}
 //    private List<TaskItem> taskItems = new ArrayList<>();
 
     @GetMapping("/list")
@@ -65,10 +66,10 @@ public class HomeController {
         int i = this.dao.update(item);
         return "redirect:/list";
     }
-    @GetMapping("/search")
-    String searchItem(@RequestParam("month") String month,
+    @GetMapping("/month_search")
+    String month_searchItem(@RequestParam("month") String month,
                       Model model){
-        List<TaskItem> taskItems = this.dao.search(month);
+        List<TaskItem> taskItems = this.dao.month_search(month);
         model.addAttribute("taskList", taskItems);
         model.addAttribute("month",month);
         return "home";
@@ -79,6 +80,16 @@ public class HomeController {
         List<TaskItem> taskItems = this.dao.judgment(complete);
         model.addAttribute("taskList", taskItems);
 //        model.addAttribute("complete",complete);
+        return "home";
+    }
+
+    @GetMapping("/name_search")
+    String name_searchItem(@RequestParam("task_name") String task_name,
+                           @RequestParam("name_search") String conditions,
+                           Model model){
+        TaskNameItem item = new TaskNameItem(task_name, conditions);
+        List<TaskItem> taskItems = this.dao.name_search(item);
+        model.addAttribute("taskList", taskItems);
         return "home";
     }
 }

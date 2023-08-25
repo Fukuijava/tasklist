@@ -16,7 +16,7 @@
 <h1 class="aaa">タスク管理アプリケーション</h1>
 
 <div class="search_month">
-  <form action="/search" id="month">
+  <form action="/month_search" id="month">
     <label class="form-label">月ごとに検索</label>
     <input type="month" name="month" id="new_month" th:value="${month}"/>
     <button type="submit">検索</button>
@@ -28,6 +28,24 @@
     <label class="form-label">完了済みは非表示</label>
     <input type="checkbox" name="complete" value="true">
     <button type="submit">実行</button>
+  </form>
+</div>
+
+<div>
+  <form action="/name_search">
+    <label class="form-label">タスク名検索</label>
+    <br>
+    <input type="radio" id="forward" name="name_search" value="forward" checked>
+    <label for="forward">前方一致</label>
+    <input type="radio" id="part" name="name_search" value="part">
+    <label for="part">部分一致</label>
+    <input type="radio" id="backward" name="name_search" value="backward">
+    <label for="backward">後方一致</label>
+    <br>
+    <label class="form-label">タスク</label>
+    <input name="task_name" type="text" id="task_name" />
+    <button type="submit">実行</button>
+
   </form>
 </div>
 <div class="task_form">
